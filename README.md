@@ -1,7 +1,7 @@
 # Aurora NAT Updater
 NAT injector for Aurora
 - Created by Dawid (609402)
-- Updated by Santiago (598172)
+- Updated by Santiago (598172) [https://github.com/0721santi]
 
 ![image](https://github.com/ivao-xa/nat-updater/assets/41238983/e2f6fae3-c018-4f1c-8ff3-388aecf93f82)
 
