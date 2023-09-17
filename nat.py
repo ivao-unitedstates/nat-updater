@@ -65,18 +65,18 @@ while n < len(response):
                 a = a.split("/")
                 if len(a[0])>2:
                     split_a = [a[0][idx:idx+2] for idx in range(0,len(a[0]),2)]
-                    string = string + "T;"+NAT[0]+";H"+str(split_a[0])+str(a[1])+";H"+str(split_a[0])+str(a[1])+";\n"
+                    string = string + "T;NAT"+NAT[0]+";H"+str(split_a[0])+str(a[1])+";H"+str(split_a[0])+str(a[1])+";\n"
                     newFix = str("H"+str(split_a[0])+str(a[1])+";N0"+str(split_a[0])+"."+str(split_a[1])+".00.000;W0"+str(a[1])+".00.00.000;")
                     fixes.append(newFix)
                 else:
-                    string = string + "T;"+NAT[0]+";"+str(a[0])+str(a[1])+"N;"+str(a[0])+str(a[1])+"N;\n"
+                    string = string + "T;NAT"+NAT[0]+";"+str(a[0])+str(a[1])+"N;"+str(a[0])+str(a[1])+"N;\n"
                     newFix = str(str(a[0])+str(a[1])+"N;N0"+str(a[0])+".00.00.000;W0"+str(a[1])+".00.00.000;")
                     fixes.append(newFix)
             else:
                 if t == 0: 
                     string = string + "L;"+NAT[0]+";"+str(a)+";"+str(a)+";\n"
                     t+=1
-                string = string + "T;"+NAT[0]+";"+str(a)+";"+str(a)+";\n"
+                string = string + "T;NAT"+NAT[0]+";"+str(a)+";"+str(a)+";\n"
                 fixes.append(a)
     n+=1
 
