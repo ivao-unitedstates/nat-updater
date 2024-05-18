@@ -14,7 +14,7 @@ if getattr(sys, 'frozen', False):
 elif __file__:
     absolute_path = os.path.dirname(__file__)
 
-path_path = absolute_path+"\path.txt"
+path_path = absolute_path+"\\path.txt"
 if os.path.isfile(path_path):
     f = open(path_path,"r")
     aurora_path = f.read()
