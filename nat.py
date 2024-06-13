@@ -1,10 +1,51 @@
 import requests
 import os
 import sys
+import time
+
+def findTimes(response: list):
+    months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"]
+    month = months[time.gmtime().tm_mon-1]
+    if time.gmtime().tm_hour < 10:
+        hour = "0"+str(time.gmtime().tm_hour)
+    else:
+        hour = str(time.gmtime().tm_hour)
+    if time.gmtime().tm_min < 10:
+        mins = "0"+str(time.gmtime().tm_min)
+    else:
+        mins = str(time.gmtime().tm_min)
+    hour = int(hour+mins)
+    validNatsPos = []
+    toBeUpdated = 0
+    i = 0
+    for arr in response:
+        if month in arr:
+            validFrom = int(arr[1].split("/")[1][0:4])
+            validTo = int(arr[4].split("<")[0].split("/")[1][0:4])
+            if hour > validFrom and hour < validTo:
+                toBeUpdated = validTo
+                validNatsPos.append(i+2) #Adds the index where the nexts NATs info are located
+        i += 1
+    return validNatsPos, toBeUpdated
 
 def getNATS():
     try:
-        return requests.get("https://api.flightplandatabase.com/nav/NATS").json()
+        response = requests.get("https://www.notams.faa.gov/common/nat.html").content.decode("UTF-8").split("\n")
+        formattedResponse = []
+        NATS = []
+        for val in response:
+            formattedResponse.append(val.split(" "))
+        indexes, validUntil = findTimes(formattedResponse)
+        if len(indexes) == 0:
+            print("No NATs are active at the moment.")
+            input("Press ENTER to exit")
+            raise SystemExit()
+        for index in indexes:
+            counter = 0
+            while len(formattedResponse[index+counter][0]) == 1:
+                NATS.append(formattedResponse[index+counter])
+                counter += 5 #Dismiss East and West Levels, NARs and EURs
+        return NATS, validUntil
     except Exception as e:
         print("Script couldn't download necessary data. Please check your internet connection!")
         input("Press ENTER to exit")
@@ -41,11 +82,14 @@ def getAuroraFixes(auroraPath):
     
     return auroraFixes
 
-def printInfo(usedNats, validUntil):
+def printInfo(usedNATS, validUntil):
     print("Added NATs:")
-    for nat in usedNats:
+    for nat in usedNATS:
         print("\tNAT "+nat)
-    print(validUntil)
+    if len(str(validUntil)) == 3:
+        print("To be updated after: 0"+str(validUntil)[0]+":"+str(validUntil)[1:3])
+    else:
+        print("To be updated after: "+str(validUntil)[0:2]+":"+str(validUntil)[2:4])
 
 def appendToFile(updatedFile, auroraPath):
     with open(os.path.join(auroraPath + "highairway.awh"),'w') as file:
@@ -53,28 +97,25 @@ def appendToFile(updatedFile, auroraPath):
 
 def addNATS(nats):
     updatedFile = ""
-    usedNats = []
+    usedNATS = []
     usedFixes = []
     for nat in nats:
-        ident = nat['ident']
-        if ident in usedNats:
-            continue
-        usedNats.append(nat['ident'])
-        fixes = nat['route']['nodes']
+        ident = nat[0]
+        usedNATS.append(ident)
+        fixes = nat[1:]
         labeled = False
         secondCol = "NAT"+ident
         for fix in fixes:
-            fixId = fix['ident']
             if not labeled:
-                updatedFile += "L;"+ident+";"+fixId+";"+fixId+";\n"
+                updatedFile += "L;"+ident+";"+fix+";"+fix+";\n"
                 labeled = True
-            if fix['type'] == "FIX":
-                updatedFile += "T;"+secondCol+";"+fixId+";"+fixId+";\n"
-                usedFixes.append(fixId)
+            if len(fix.split("/")) == 1:
+                updatedFile += "T;"+secondCol+";"+fix+";"+fix+";\n"
+                usedFixes.append(fix)
             else:
                 newFix = ""
                 coord = ""
-                coordArr = fixId.split("/")
+                coordArr = fix.split("/")
                 if len(coordArr[0]) == 2:
                     coord = coordArr[0] + coordArr[1] + "N"
                     newFix = coord+";N0"+str(coordArr[0])+".00.00.000;W0"+str(coordArr[1])+".00.00.000;"
@@ -83,12 +124,7 @@ def addNATS(nats):
                     newFix = coord+";N0"+str(coordArr[0][0:2])+"."+str(coordArr[0][2:4])+".00.000;W0"+str(coordArr[1])+".00.00.000;"
                 usedFixes.append(newFix)
                 updatedFile += "T;"+secondCol+";"+coord+";"+coord+";\n"
-    
-    validUntil = nats[0]['validTo'].split("T")
-    hour = validUntil[1].split(":")
-    validUntil = "Valid until: "+validUntil[0]+"@"+hour[0]+":"+hour[1]+"Z"
-    printInfo(usedNats, validUntil)
-    return usedFixes, updatedFile
+    return usedFixes, updatedFile, usedNATS
 
 def verifyMissingFixes(auroraFixes, usedFixes, auroraPath):
     manualFixes = []
@@ -114,8 +150,9 @@ def verifyMissingFixes(auroraFixes, usedFixes, auroraPath):
 def main():
     auroraPath = getAuroraPath()
     auroraFixes = getAuroraFixes(auroraPath)
-    nats = getNATS()
-    usedFixes, updatedFile = addNATS(nats)
+    nats, validUntil = getNATS()
+    usedFixes, updatedFile, usedNATS = addNATS(nats)
+    printInfo(usedNATS, validUntil)
     appendToFile(updatedFile, auroraPath)
     verifyMissingFixes(auroraFixes, usedFixes, auroraPath)
     input("Press ENTER to exit")
