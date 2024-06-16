@@ -87,9 +87,9 @@ def printInfo(usedNATS, validUntil):
     for nat in usedNATS:
         print("\tNAT "+nat)
     if len(str(validUntil)) == 3:
-        print("To be updated after: 0"+str(validUntil)[0]+":"+str(validUntil)[1:3])
+        print("To be updated after: 0"+str(validUntil)[0]+":"+str(validUntil)[1:3]+"Z")
     else:
-        print("To be updated after: "+str(validUntil)[0:2]+":"+str(validUntil)[2:4])
+        print("To be updated after: "+str(validUntil)[0:2]+":"+str(validUntil)[2:4]+"Z")
 
 def appendToFile(updatedFile, auroraPath):
     with open(os.path.join(auroraPath + "highairway.awh"),'w') as file:
