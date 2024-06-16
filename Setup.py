@@ -1,11 +1,14 @@
 from cx_Freeze import setup, Executable
 
 setup(
-    name="Aurora NATs injector",
+    name="Aurora NAT Updater",
     version="2.0",
     author="IVAO - OCC",
     description="Aurora NATs injector",
     executables = [
-        Executable("D:/Perfil/Documents/Proyectos/nat-updater/nat.py")
+        Executable(
+            "./nat.py",
+            icon="./OCC.ico",
+        )
     ]
 )
