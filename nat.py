@@ -62,15 +62,19 @@ def getAuroraPath():
         auroraPath = file.read()
     else:
         auroraPath = input('Paste "Aurora" folder path: ').rstrip("\\")
-        while not os.path.isdir(auroraPath+"\\SectorFiles\\Include\\CA\\czqx\\"):
+        while not os.path.isdir(auroraPath):
             print("Invalid path. Please make sure you have pasted the correct path to the Aurora folder.")
             auroraPath = input('Paste "Aurora" folder path: ').rstrip("\\")
-        os.system('cls')
         auroraPath = auroraPath+"\\SectorFiles\\Include\\CA\\czqx\\"
-        file = open(auroraPathFile,"w")
-        file.write(auroraPath)
-        file.close()
-        print("Created file with Aurora path in this directory: "+auroraPathFile+"\n")
+        if not os.path.isdir(auroraPath):
+            print("The CA sectorfile (CZQX) was not found.")
+            input("Press ENTER to exit")
+            raise SystemExit()
+        else:
+            file = open(auroraPathFile,"w")
+            file.write(auroraPath)
+            file.close()
+            print("Created file with Aurora path in this directory: "+auroraPathFile+"\n")
 
     return auroraPath
 
