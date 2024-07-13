@@ -63,6 +63,9 @@ def getAuroraPath():
     else:
         auroraPath = input('Paste "Aurora" folder path: ').rstrip("\\")
         os.system('cls')
+        while not os.path.isdir(auroraPath+"\\SectorFiles\\Include\\CA\\czqx\\"):
+            print("Invalid path. Please make sure you have pasted the correct path to the Aurora folder.")
+            auroraPath = input('Paste "Aurora" folder path: ').rstrip("\\")
         auroraPath = auroraPath+"\\SectorFiles\\Include\\CA\\czqx\\"
         file = open(auroraPathFile,"w")
         file.write(auroraPath)
